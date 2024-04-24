@@ -25,7 +25,7 @@ public class Leaderboard : MonoBehaviour
     void Start()
     {
         leaderboard = new List<ScoreEntry>();
-        scoreEntryContainer = GetComponent<RectTransform>();
+        scoreEntryContainer = GetComponent<RectTransform>(); // Aquí asignamos el contenedor de las entradas
 
         // Obtener el tamaño y posición original del prefab
         originalPrefabSize = scoreEntryPrefab.GetComponent<RectTransform>().sizeDelta;
@@ -37,34 +37,37 @@ public class Leaderboard : MonoBehaviour
     }
 
     private void HandleValueChanged(object sender, ValueChangedEventArgs args)
-    { 
-    Debug.Log("ValueChanged");
+    {
+        Debug.Log("ValueChanged");
         if (args.DatabaseError != null)
         {
             Debug.Log(args.DatabaseError.Message);
             return;
         }
 
-DataSnapshot snapshot = args.Snapshot;
+        DataSnapshot snapshot = args.Snapshot;
 
-int i = 0;
+        // Eliminar las entradas anteriores
+        foreach (ScoreEntry entry in leaderboard)
+        {
+            Destroy(entry.gameObject);
+        }
+        leaderboard.Clear();
 
-var _leaderboard = gameObject.GetComponentsInChildren<ScoreEntry>();
-foreach (var go in _leaderboard)
-{
-    Destroy(go.gameObject);
-}
+        int i = 0;
 
-var leaderboarDictionary = (Dictionary<string, object>)snapshot.Value;
-var _leaderborard = leaderboarDictionary.Values.OrderByDescending(x => int.Parse("" + ((Dictionary<string, object>)x)["score"]));
-foreach (var userDoc in _leaderborard)
-{
-    var userObject = (Dictionary<string, object>)userDoc;
+        var leaderboardData = snapshot.Children.Cast<DataSnapshot>()
+            .OrderByDescending(x => Convert.ToInt32(x.Child("score").Value)).Take(5).ToList();
 
-    var go = GameObject.Instantiate(scoreEntryPrefab, transform);
-    go.transform.position = new Vector2(go.transform.position.x, VerticalOffset - (VerticalSpace * i));
-    go.GetComponent<ScoreEntry>().SetLabels("" + userObject["username"], "" + userObject["score"]);
-    i++;
-}
+        foreach (var userDoc in leaderboardData)
+        {
+            var userObject = (Dictionary<string, object>)userDoc.Value;
+
+            var go = GameObject.Instantiate(scoreEntryPrefab, scoreEntryContainer); // Usamos el contenedor de las entradas
+            go.transform.localPosition = new Vector2(0f, VerticalOffset - (VerticalSpace * i)); // LocalPosition en lugar de Position
+            go.GetComponent<ScoreEntry>().SetLabels("" + userObject["username"], "" + userObject["score"]);
+
+            i++;
+        }
     }
 }
