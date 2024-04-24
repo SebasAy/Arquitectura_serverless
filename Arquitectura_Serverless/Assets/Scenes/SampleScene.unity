@@ -3014,8 +3014,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreEntryPrefab: {fileID: 8772862117726018519, guid: 60f95753599007a43a3dbb8b03d68f00, type: 3}
-  VerticalOffset: -200
-  VerticalSpace: 5
+  VerticalOffset: 90
+  VerticalSpace: 25
 --- !u!1 &1103530380
 GameObject:
   m_ObjectHideFlags: 0
