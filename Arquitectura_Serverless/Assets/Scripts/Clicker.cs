@@ -1,3 +1,5 @@
+using Firebase.Auth;
+using Firebase.Database;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -17,10 +19,13 @@ public class Clicker : MonoBehaviour
     private bool gameStarted = false;
     private int highScore = 0;
 
+    private DatabaseReference mDatabaseRef;
+
     void Start()
     {
         timer = gameDuration;
         UpdateHighScoreText();
+        mDatabaseRef = FirebaseDatabase.DefaultInstance.RootReference;
     }
 
     void Update()
@@ -67,6 +72,13 @@ public class Clicker : MonoBehaviour
         if (score > highScore)
         {
             highScore = score;
+            FirebaseUser currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
+
+            if (currentUser != null)
+            {
+                mDatabaseRef.Child("users").Child(currentUser.UserId).Child("score").SetValueAsync(highScore);
+            }
+
             UpdateHighScoreText();
         }
 
@@ -83,4 +95,4 @@ public class Clicker : MonoBehaviour
         score = 0;
         timer = gameDuration;
     }
-}
+}   
